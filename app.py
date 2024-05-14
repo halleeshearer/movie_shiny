@@ -32,12 +32,12 @@ options.update(glasser_int_keys)
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
-        ui.input_select(
-            "measure",
-            "Reliability measure",
-            {"discr": "Discriminability", "i2c2" : "I2C2", "finger" : "Fingerprinting"},
-            selected=["i2c2"],
-        ),
+        # ui.input_select(
+        #     "measure",
+        #     "Reliability measure",
+        #     {"discr": "Discriminability", "i2c2" : "I2C2", "finger" : "Fingerprinting"},
+        #     selected=["i2c2"],
+        # ),
         ui.input_select(
             "plot",
             "Plot",
@@ -52,29 +52,24 @@ app_ui = ui.page_sidebar(
         ),
         ui.input_slider("plot_max", "Max value", min=0, max=1, value=0.5, step=0.05)
     ),
-    # ui.layout_column_wrap(
-    #     ui.value_box(
-    #         "Number of penguins",
-    #         ui.output_text("count"),
-    #         showcase=icon_svg("earlybirds"),
-    #     ),
-    #     ui.value_box(
-    #         "Average bill length",
-    #         ui.output_text("bill_length"),
-    #         showcase=icon_svg("ruler-horizontal"),
-    #     ),
-    #     ui.value_box(
-    #         "Average bill depth",
-    #         ui.output_text("bill_depth"),
-    #         showcase=icon_svg("ruler-vertical"),
-    #     ),
-    #     fill=False,
-    # ),
-    ui.layout_columns(
-        ui.card(  
-            ui.card_header("Multivariate test-retest reliability"),
-            ui.output_ui("mv_rel"), # output_ui - spit out html
-            full_screen=True,
+
+    ui.layout_column_wrap(
+        ui.card(
+            ui.card_header("I2C2"),
+            ui.output_ui("i2c2"),
+            ui.input_slider("i2c2_max", "Max value", min=0, max=1, value=0.3, step=0.05),
+            full_screen = True),
+        ui.card(
+            ui.card_header("Discriminability"),
+            ui.output_ui("discr"),
+            ui.input_slider("discr_max", "Max value", min=0, max=1, value=0.3, step=0.05),
+            full_screen = True,
+        ),
+        ui.card(
+            ui.card_header("Fingerprinting"),
+            ui.output_ui("finger"),
+            ui.input_slider("finger_max", "Max value", min=0, max=1, value=0.3, step=0.05),
+            full_screen = True,
         ),
     ),
     ui.include_css(app_dir / "styles.css"),
@@ -84,15 +79,38 @@ app_ui = ui.page_sidebar(
 
 
 def server(input, output, session):
+
     @reactive.calc
-    def filtered_df():
+    def filtered_df_i2c2():
         if input.roi() == "All":
-            filt_df = data[f"{input.measure()}_{input.plot()}"]
+            filt_df = data[f"i2c2_{input.plot()}"]
         # if roi is selected, then set all other values to 0
         if input.roi() != "All":
             # set all values to 0 except for the value at the index of the selected roi number
             filt_df = np.zeros(len(data))
-            filt_df[int(input.roi())-1] = data[f"{input.measure()}_{input.plot()}"][int(input.roi())-1]
+            filt_df[int(input.roi())-1] = data[f"i2c2_{input.plot()}"][int(input.roi())-1]
+        return filt_df
+    
+    @reactive.calc
+    def filtered_df_discr():
+        if input.roi() == "All":
+            filt_df = data[f"discr_{input.plot()}"]
+        # if roi is selected, then set all other values to 0
+        if input.roi() != "All":
+            # set all values to 0 except for the value at the index of the selected roi number
+            filt_df = np.zeros(len(data))
+            filt_df[int(input.roi())-1] = data[f"discr_{input.plot()}"][int(input.roi())-1]
+        return filt_df
+    
+    @reactive.calc
+    def filtered_df_finger():
+        if input.roi() == "All":
+            filt_df = data[f"finger_{input.plot()}"]
+        # if roi is selected, then set all other values to 0
+        if input.roi() != "All":
+            # set all values to 0 except for the value at the index of the selected roi number
+            filt_df = np.zeros(len(data))
+            filt_df[int(input.roi())-1] = data[f"finger_{input.plot()}"][int(input.roi())-1]
         return filt_df
 
 
@@ -106,12 +124,29 @@ def server(input, output, session):
     #     return f"{filtered_df()['bill_depth_mm'].mean():.1f} mm"
 
 
+    # @render.ui
+    # def mv_rel():
+    #     surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.plot_max(), threshold = 0.00000001)
+    #     html = surf_plot.get_iframe() # get_iframe() or get_standalone()
+    #     return ui.HTML(html)
+    
     @render.ui
-    def mv_rel():
-        # plot the i2c2_m column of data with nilearn plotting surface
-        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.plot_max(), threshold = 0.00000001)
+    def i2c2():
+        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_i2c2(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.i2c2_max(), threshold = 0.00000001)
         html = surf_plot.get_iframe() # get_iframe() or get_standalone()
-        return ui.HTML(html)
+        return ui.HTML(html) 
+
+    @render.ui
+    def discr():
+        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_discr(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.discr_max(), threshold = 0.00000001)
+        html = surf_plot.get_iframe() # get_iframe() or get_standalone()
+        return ui.HTML(html) 
+    
+    @render.ui
+    def finger():
+        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_finger(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.finger_max(), threshold = 0.00000001)
+        html = surf_plot.get_iframe() # get_iframe() or get_standalone()
+        return ui.HTML(html) 
     
 
 
