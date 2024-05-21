@@ -132,19 +132,22 @@ def server(input, output, session):
     
     @render.ui
     def i2c2():
-        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_i2c2(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.i2c2_max(), threshold = 0.00000001)
+        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_i2c2(), hcp.mmp)), cmap="cold_white_hot", bg_map=hcp.mesh.sulc, vmax = input.i2c2_max(), colorbar = True)
+        surf_plot.resize(300, 300)
         html = surf_plot.get_iframe() # get_iframe() or get_standalone()
         return ui.HTML(html) 
 
     @render.ui
     def discr():
-        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_discr(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.discr_max(), threshold = 0.00000001)
+        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_discr(), hcp.mmp)), cmap="cold_white_hot", bg_map=hcp.mesh.sulc, vmax = input.discr_max(), colorbar = True)
+        surf_plot.resize(300, 300)
         html = surf_plot.get_iframe() # get_iframe() or get_standalone()
         return ui.HTML(html) 
     
     @render.ui
     def finger():
-        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_finger(), hcp.mmp)), cmap="viridis", bg_map=hcp.mesh.sulc, vmax = input.finger_max(), threshold = 0.00000001)
+        surf_plot = plotting.view_surf(hcp.mesh.inflated, hcp.cortex_data(hcp.unparcellate(filtered_df_finger(), hcp.mmp)), cmap="cold_white_hot", bg_map=hcp.mesh.sulc, vmax = input.finger_max(), colorbar = True)
+        surf_plot.resize(300, 300)
         html = surf_plot.get_iframe() # get_iframe() or get_standalone()
         return ui.HTML(html) 
     
