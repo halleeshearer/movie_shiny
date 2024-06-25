@@ -4,3 +4,4 @@ seaborn
 pandas
 nilearn
 hcp_utils
+shinywidgets
